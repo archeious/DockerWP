@@ -1,0 +1,9 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =7
+let g:netrw_dirhist_1='/Users/cjensen/.oh-my-zsh'
+let g:netrw_dirhist_2='/Users/cjensen/.oh-my-zsh/custom'
+let g:netrw_dirhist_3='/Users/cjensen/.vim'
+let g:netrw_dirhist_4='/Users/cjensen/Dropbox/dev/wp-brokenness-exercises/media'
+let g:netrw_dirhist_5='/Users/cjensen/Dropbox/casperjs-ui/app'
+let g:netrw_dirhist_6='/Users/cjensen/Dropbox/c/programming/javascript/casperjs/name-generator'
+let g:netrw_dirhist_7='/Users/cjensen/Dropbox/c/casperjs-web_accessibility/node_modules/pa11y'
