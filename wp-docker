@@ -1,0 +1,84 @@
+#!/bin/bash
+
+CONTAINER_NAME="dockerwp"
+DEFAULT_MYSQL_ROOT_PASSWORD="yourpassword"
+MYSQL_DOCKER_IMG=""
+WP_DOCKER_IMG=""
+MYSQL_START_OPTIONS=""
+WWW_START_OPTIONS=""
+
+usage() {
+    echo "wp-docker [command...]"
+    echo "Commands"
+    echo "  start - starts/builds the needed docker containers"
+    echo "  stop - stops the docker containers (do not remove)"
+    echo "  remove - removed the docker contatiners"
+    echo "  persist-www {dir} - directory to map document root"
+    echo "  persist-sql {dir} - direcotry to map sql data"
+}
+
+build() {
+    echo "Building ${CONTAINER_NAME}"
+    docker build -t ${CONTAINER_NAME} .
+}
+
+start() {
+    build
+    MYSQL_IMG=$(eval "docker run --name dockerwp-mysql -e MYSQL_ROOT_PASSWORD=${DEFAULT_MYSQL_ROOT_PASSWORD} $MYSQL_START_OPTIONS -d mysql")
+    DOCKER_WP_IMG=$(eval "docker run --name dockerwp-wordpress --link dockerwp-mysql:mysql -p 8080:80 -d $WWW_START_OPTIONS dockerwp")
+}
+
+stop () {
+    echo "Stopping DockerWP..."
+    docker stop dockerwp-{mysql,wordpress}
+    echo "Stopped"
+}
+
+remove() {
+    echo "Removing DockerWP containers..."
+    docker rm -v dockerwp-{mysql,wordpress}
+    echo "Removed"
+}
+
+
+
+if [ "$(uname)" == "Darwin" ]
+then
+    # Mac OS X platform
+    OS='Darwin'
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]
+then
+    # GNU/Linux platform
+    OS='Linux'
+elif [ "$(expr substr $(uname -s) 1 4)" == "MING" ]
+then
+    # Windows NT platform
+    OS='Ming'
+elif [ "$(expr substr $(uname -s) 1 4)" == "MING" ]
+then
+    # Windows NT platform
+    OS='Cygwin'
+else
+    OS='undefined'
+fi
+
+if [ "$1" == "" ]
+then
+    usage
+fi
+
+while [ "$1" != "" ]
+do
+    case "$1" in
+        stop) stop ;;
+        remove) remove ;;
+        persist-mysql) MYSQL_START_OPTIONS="${MYSQL_START_OPTIONS} -v $2:/var/lib/mysql"; shift ;;
+        persist-www) WWW_START_OPTIONS="${WWW_START_OPTIONS} -v $2:/var/www/html"; shift ;;
+        start) start ;;
+        *)
+            echo "Unknown command $1";
+            break;;
+    esac
+    shift
+done
+echo $PERSIST_MYSQL_DIR
