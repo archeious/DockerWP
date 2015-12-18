@@ -15,6 +15,8 @@ usage() {
     echo "  remove - removed the docker contatiners"
     echo "  persist-www {dir} - directory to map document root"
     echo "  persist-sql {dir} - direcotry to map sql data"
+    echo "  export-db {filename} - export database to {filename}"
+    echo "  import-db {filename} - import datebase from {filename}"
 }
 
 build() {
@@ -38,6 +40,18 @@ remove() {
     echo "Removing DockerWP containers..."
     docker rm -v dockerwp-{mysql,wordpress}
     echo "Removed"
+}
+
+exportdb() {
+    echo "Backing up database..."
+    docker exec dockerwp-wordpress wp --allow-root db export /root/wordpress.sql
+    docker cp dockerwp-wordpress:/root/wordpress.sql "$1"
+}
+
+importdb() {
+    echo "Restoring database..."
+    docker cp "$1" dockerwp-wordpress:/root/wordpress.sql
+    docker exec dockerwp-wordpress wp --allow-root db import /root/wordpress.sql
 }
 
 
@@ -70,11 +84,13 @@ fi
 while [ "$1" != "" ]
 do
     case "$1" in
+        start) start ;;
         stop) stop ;;
         remove) remove ;;
         persist-mysql) MYSQL_START_OPTIONS="${MYSQL_START_OPTIONS} -v $2:/var/lib/mysql"; shift ;;
         persist-www) WWW_START_OPTIONS="${WWW_START_OPTIONS} -v $2:/var/www/html"; shift ;;
-        start) start ;;
+        export-db) backupdb $2; shift ;;
+        import-db) restoredb $2; shift ;;
         *)
             echo "Unknown command $1";
             break;;
